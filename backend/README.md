@@ -67,29 +67,249 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 8. Create a `POST` endpoint to get questions to play the quiz. This endpoint should take a category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions.
 9. Create error handlers for all expected errors including 400, 404, 422, and 500.
 
-## Documenting your Endpoints
+## API Reference
 
-You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
+### Error handling
+Error are returned as json in following format
+```json
+{
+  "success": False,
+  "error": 404,
+  "message": "Not found"
+}
+```   
+The API will return four error types when requests fail:
+- 404: Not found
+- 405: Method not allowed
+- 422: Unprocessable
+- 500: Internal Server Error
 
 ### Documentation Example
 
-`GET '/api/v1.0/categories'`
+`GET '/categories'`
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
 - Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
+- Sample request: `curl http://localhost:5000/categories`
+- Sample response:
+  ```json
+  {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  }
+  ```
 
-```json
-{
-  "1": "Science",
-  "2": "Art",
-  "3": "Geography",
-  "4": "History",
-  "5": "Entertainment",
-  "6": "Sports"
-}
-```
-
+`GET '/questions'`
+- Fetches a list of questions in all categories and result are paginated in groups of 10, choose page number by include a request argument, starting from 1
+- Return: a list of category, a list of questions, total number of questions and current category
+- Sample request: `curl http://localhost:5000/questions?page=2`
+- Sample response:
+  ```json
+  {
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography",
+        "4": "History",
+        "5": "Entertainment",
+        "6": "Sports"
+    },
+    "currentCategory": null,
+    "questions": [
+        {
+            "answer": "Agra",
+            "category": 3,
+            "difficulty": 2,
+            "id": 15,
+            "question": "The Taj Mahal is located in which Indian city?"
+        },
+        {
+            "answer": "Escher",
+            "category": 2,
+            "difficulty": 1,
+            "id": 16,
+            "question": "Which Dutch graphic artist–initials M C was a creator of optical illusions?"
+        },
+        {
+            "answer": "Mona Lisa",
+            "category": 2,
+            "difficulty": 3,
+            "id": 17,
+            "question": "La Giaconda is better known as what?"
+        },
+        {
+            "answer": "One",
+            "category": 2,
+            "difficulty": 4,
+            "id": 18,
+            "question": "How many paintings did Van Gogh sell in his lifetime?"
+        },
+        {
+            "answer": "Jackson Pollock",
+            "category": 2,
+            "difficulty": 2,
+            "id": 19,
+            "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+        },
+        {
+            "answer": "The Liver",
+            "category": 1,
+            "difficulty": 4,
+            "id": 20,
+            "question": "What is the heaviest organ in the human body?"
+        },
+        {
+            "answer": "Alexander Fleming",
+            "category": 1,
+            "difficulty": 3,
+            "id": 21,
+            "question": "Who discovered penicillin?"
+        },
+        {
+            "answer": "Blood",
+            "category": 1,
+            "difficulty": 4,
+            "id": 22,
+            "question": "Hematology is a branch of medicine involving the study of what?"
+        },
+        {
+            "answer": "new_answer",
+            "category": 1,
+            "difficulty": 4,
+            "id": 24,
+            "question": "new_question"
+        },
+        {
+            "answer": "1945",
+            "category": 1,
+            "difficulty": 1,
+            "id": 25,
+            "question": "What year was the United Nations established?"
+        }
+    ],
+    "total_questions": 10
+  }
+  ```
+`POST '/questions'`
+- Create new question using the submitted question, answer, category, difficulty
+- Return success message
+- Sample request: `curl -X POST http://localhost:5000 -H "Content-Type: application/json" -d '{"question":"What is the color of an orange?", "answer":"orange", "category":1, "difficulty":1}'`
+- Sample response:
+  ```json
+  {
+    "success": True,
+    "message": "Create question successfully!"
+  }
+  ```
+`DELETE '/questions/<id>'`
+- Delete the question of the given id if it exsists
+- Return success message
+- Sample request: `curl -X DELETE http://localhost:5000/1`
+- Sample response: 
+  ```json
+  {
+    "success": True,
+    "message": "Question deleted successfully!"
+  }
+  ```
+`POST 'questions/search'`
+- Search for questions using the search term
+- Request parameters: searchTerm
+- Return list of questions, the total number of questions and current category
+- Sample request: `curl -X POST http://localhost:5000 -H "Content-Type: application/json" -d '{"searchTerm":"Who"}'`
+- Sample response:
+  ```json
+  {
+    "currentCategory": null,
+    "questions": [
+        {
+            "answer": "Maya Angelou",
+            "category": 4,
+            "difficulty": 2,
+            "id": 5,
+            "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+        },
+        {
+            "answer": "George Washington Carver",
+            "category": 4,
+            "difficulty": 2,
+            "id": 12,
+            "question": "Who invented Peanut Butter?"
+        },
+        {
+            "answer": "Alexander Fleming",
+            "category": 1,
+            "difficulty": 3,
+            "id": 21,
+            "question": "Who discovered penicillin?"
+        }
+    ],
+    "totalQuestions": 3
+  }
+  ```
+`GET '/categories/<category_id>/questions'`
+- Fetch all question in given category id
+- Return list of question, the total number of question and current category
+- Sample request: `curl http://localhost:5000/categories/3/questions`
+- Sample response:
+  ```json
+  {
+    "currentCategory": "Geography",
+    "questions": [
+        {
+            "answer": "Lake Victoria",
+            "category": 3,
+            "difficulty": 2,
+            "id": 13,
+            "question": "What is the largest lake in Africa?"
+        },
+        {
+            "answer": "The Palace of Versailles",
+            "category": 3,
+            "difficulty": 3,
+            "id": 14,
+            "question": "In which royal palace would you find the Hall of Mirrors?"
+        },
+        {
+            "answer": "Agra",
+            "category": 3,
+            "difficulty": 2,
+            "id": 15,
+            "question": "The Taj Mahal is located in which Indian city?"
+        }
+    ],
+    "totalQuestions": 3
+  }
+  ```
+`POST '/quizzes'`
+- Get the next question by randomizing either all questions or within a specific category.
+- Return next question
+- Sample request `curl -X POST 'http://localhost:5000/quizzes'
+-H 'Content-Type: application/json'
+-d '{
+    "previous_questions":[],
+    "quiz_category":{
+        "type": "History",
+        "id":4
+    }
+}'`
+- Sample response
+  ```json
+  {
+    "question": {
+        "answer": "George Washington Carver",
+        "category": 4,
+        "difficulty": 2,
+        "id": 12,
+        "question": "Who invented Peanut Butter?"
+    }
+  }
+  ```
 ## Testing
 
 Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
