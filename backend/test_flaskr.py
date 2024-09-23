@@ -101,7 +101,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "Unprocessable")
 
     def test_delete_question_success(self):
-        res = self.client().delete('/questions/1')
+        question = Question.query.get(5)
+        if question == None:
+            question = Question(question="Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?", answer="Maya Angelou", category=4, difficulty=2)
+            question.insert()
+
+        res = self.client().delete('/questions/{}'.format(question.id))
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
